@@ -1,4 +1,5 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes
 
 
 def main_menu_keyboard():
@@ -18,3 +19,12 @@ def main_menu_keyboard():
     ]
 
     return InlineKeyboardMarkup(keyboard)
+
+
+async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🛡️ *LifeGuard 365 Menu*\n\n"
+        "Choose an option below:",
+        reply_markup=main_menu_keyboard(),
+        parse_mode="Markdown",
+    )
