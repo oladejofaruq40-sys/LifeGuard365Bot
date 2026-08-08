@@ -19,9 +19,7 @@ initialize_database
 load_dotenv()
 # Logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %
-(levelname)s - %(message)s",
-    level=logging.INFO,
+    level=logging.INFO
 )
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 async def button_handler(
