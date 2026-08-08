@@ -33,14 +33,8 @@ def add_subscriber(user_id, first_name="", username=""):
     now = datetime.utcnow().isoformat()
 
     connection.execute("""
-        INSERT INTO subscribers (
-            user_id,
-            first_name,
-            username,
-            subscribed,
-            created_at,
-            updated_at
-        )
+        INSERT INTO subscribers
+        (user_id, first_name, username, subscribed, created_at, updated_at)
         VALUES (?, ?, ?, 1, ?, ?)
         ON CONFLICT(user_id)
         DO UPDATE SET

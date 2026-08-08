@@ -8,6 +8,7 @@ from database import (
 
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     user = update.effective_user
 
     add_subscriber(
@@ -29,6 +30,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     user = update.effective_user
 
     remove_subscriber(user.id)
