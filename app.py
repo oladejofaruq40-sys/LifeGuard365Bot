@@ -26,11 +26,9 @@ async def button_handler(
 ):
     query = update.callback_query
     await query.answer()
-    async def button_handler(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-    query = update.callback_query
+    async def button_handler(update: Update, context:
+    ContextTypes.DEFAULT_TYPE
+):      query = update.callback_query
     await query.answer()
     if query.data == "today":
         message = """
