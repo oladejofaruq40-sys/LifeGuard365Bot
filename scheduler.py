@@ -2,7 +2,11 @@ import logging
 from datetime import time
 from zoneinfo import ZoneInfo
 
-from telegram.ext import Application, ContextTypes
+from telegram import Bot
+from telegram.ext import (
+    Application,
+    ContextTypes,
+)
 
 from database import get_subscribers
 from services.safety_content import get_daily_safety_message
@@ -15,7 +19,8 @@ async def send_daily_safety_message(
     context: ContextTypes.DEFAULT_TYPE,
 ):
     """
-    Sends today's safety message to every active subscriber.
+    Send today's LifeGuard 365 safety message
+    to every active subscriber.
     """
 
     message = get_daily_safety_message()
@@ -23,7 +28,7 @@ async def send_daily_safety_message(
     subscribers = get_subscribers()
 
     logger.info(
-        "Sending daily safety message to %s subscribers",
+        "Starting daily safety broadcast to %s subscribers.",
         len(subscribers),
     )
 
@@ -33,7 +38,6 @@ async def send_daily_safety_message(
     for user_id in subscribers:
 
         try:
-
             await context.bot.send_message(
                 chat_id=user_id,
                 text=message,
@@ -47,7 +51,8 @@ async def send_daily_safety_message(
             failed += 1
 
             logger.warning(
-                "Could not send message to %s: %s",
+                "Could not send daily safety message "
+                "to user %s: %s",
                 user_id,
                 error,
             )
@@ -60,17 +65,23 @@ async def send_daily_safety_message(
     )
 
 
-def setup_scheduler(application: Application):
+def setup_scheduler(
+    application: Application,
+):
+    """
+    Schedule the LifeGuard 365 daily broadcast
+    for 07:00 AM Africa/Lagos time.
+    """
 
     job_queue = application.job_queue
 
     if job_queue is None:
         raise RuntimeError(
             "Telegram JobQueue is not available. "
-            "Check the python-telegram-bot dependencies."
+            "Make sure python-telegram-bot[job-queue] "
+            "is installed."
         )
 
-    # 7:00 AM every day
     daily_time = time(
         hour=7,
         minute=0,
@@ -80,10 +91,10 @@ def setup_scheduler(application: Application):
     job_queue.run_daily(
         send_daily_safety_message,
         time=daily_time,
-        name="daily_safety_broadcast",
+        name="lifeguard365_daily_broadcast",
     )
 
     logger.info(
-        "Daily LifeGuard 365 broadcast scheduled "
+        "🛡️ LifeGuard 365 daily broadcast scheduled "
         "for 07:00 Africa/Lagos."
     )

@@ -1,5 +1,6 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
+
 
 DATABASE_NAME = "lifeguard365.db"
 
@@ -13,28 +14,42 @@ def get_connection():
 def initialize_database():
     connection = get_connection()
 
-    connection.execute("""
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS subscribers (
             user_id INTEGER PRIMARY KEY,
             first_name TEXT,
             username TEXT,
-            subscribed INTEGER DEFAULT 1,
-            created_at TEXT,
-            updated_at TEXT
+            subscribed INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
         )
-    """)
+        """
+    )
 
     connection.commit()
     connection.close()
 
 
-def add_subscriber(user_id, first_name="", username=""):
-    connection = get_connection()
-    now = datetime.utcnow().isoformat()
+def add_subscriber(
+    user_id: int,
+    first_name: str = "",
+    username: str = "",
+):
+    now = datetime.now(timezone.utc).isoformat()
 
-    connection.execute("""
-        INSERT INTO subscribers
-        (user_id, first_name, username, subscribed, created_at, updated_at)
+    connection = get_connection()
+
+    connection.execute(
+        """
+        INSERT INTO subscribers (
+            user_id,
+            first_name,
+            username,
+            subscribed,
+            created_at,
+            updated_at
+        )
         VALUES (?, ?, ?, 1, ?, ?)
         ON CONFLICT(user_id)
         DO UPDATE SET
@@ -42,30 +57,37 @@ def add_subscriber(user_id, first_name="", username=""):
             username = excluded.username,
             subscribed = 1,
             updated_at = excluded.updated_at
-    """, (
-        user_id,
-        first_name,
-        username,
-        now,
-        now
-    ))
+        """,
+        (
+            user_id,
+            first_name,
+            username,
+            now,
+            now,
+        ),
+    )
 
     connection.commit()
     connection.close()
 
 
-def remove_subscriber(user_id):
+def remove_subscriber(user_id: int):
+    now = datetime.now(timezone.utc).isoformat()
+
     connection = get_connection()
 
-    connection.execute("""
+    connection.execute(
+        """
         UPDATE subscribers
         SET subscribed = 0,
             updated_at = ?
         WHERE user_id = ?
-    """, (
-        datetime.utcnow().isoformat(),
-        user_id
-    ))
+        """,
+        (
+            now,
+            user_id,
+        ),
+    )
 
     connection.commit()
     connection.close()
@@ -74,13 +96,18 @@ def remove_subscriber(user_id):
 def get_subscribers():
     connection = get_connection()
 
-    cursor = connection.execute("""
+    cursor = connection.execute(
+        """
         SELECT user_id
         FROM subscribers
         WHERE subscribed = 1
-    """)
+        """
+    )
 
-    subscribers = [row["user_id"] for row in cursor.fetchall()]
+    subscribers = [
+        row["user_id"]
+        for row in cursor.fetchall()
+    ]
 
     connection.close()
 
@@ -90,11 +117,13 @@ def get_subscribers():
 def get_subscriber_count():
     connection = get_connection()
 
-    cursor = connection.execute("""
+    cursor = connection.execute(
+        """
         SELECT COUNT(*) AS total
         FROM subscribers
         WHERE subscribed = 1
-    """)
+        """
+    )
 
     count = cursor.fetchone()["total"]
 

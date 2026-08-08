@@ -1,29 +1,42 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from handlers.menu import main_menu_keyboard
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_message = """
- *WELCOME TO LIFEGUARD 365*
-Your Daily Safety & Life Awareness Assistant.
-Every day, we share practical safety knowledge designed to help you:
- Stay safer at work
- Protect your home and family
- Make safer decisions on the road
- Prevent electrical accidents
- Prevent fires
- Stay safe around water
- Protect your wellbeing
- Stay safer online
- Protect your environment
-One message can change a decision.
-One decision can save a life.
- *Protect yourself.*
- *Protect others.*
- *Protect life.*
-Choose an option below:
-"""
+
+from services.safety_content import get_daily_safety_message
+
+
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """
+    Handles the /start command.
+    """
+
+    user = update.effective_user
+
+    first_name = user.first_name or "Friend"
+
+    message = (
+        f"👋 *Welcome, {first_name}!*\n\n"
+        "🛡️ *LIFEGUARD 365*\n"
+        "Your Daily Safety & Life Awareness Assistant.\n\n"
+        "Every day, LifeGuard 365 delivers practical "
+        "safety awareness designed to help you:\n\n"
+        "🧠 Think before you act.\n"
+        "⚠️ Recognize hazards.\n"
+        "🛡️ Prevent accidents.\n"
+        "❤️ Protect life.\n\n"
+        "Use /menu to explore the LifeGuard 365 "
+        "safety features.\n\n"
+        "📢 You can also use /subscribe to receive "
+        "our automatic daily safety message.\n\n"
+        "Stay safe.\n"
+        "Stay informed.\n"
+        "Protect life.\n\n"
+        "— *LifeGuard 365*"
+    )
+
     await update.message.reply_text(
-        welcome_message,
+        message,
         parse_mode="Markdown",
-        reply_markup=main_menu_keyboard(),
     )

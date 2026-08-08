@@ -1,27 +1,33 @@
-import os
 import logging
+import os
 
 from dotenv import load_dotenv
 
 from telegram import Update
 from telegram.ext import (
     Application,
-    CommandHandler,
     CallbackQueryHandler,
+    CommandHandler,
     ContextTypes,
 )
 
-from handlers.start import start
-from handlers.menu import show_menu
-from handlers.subscription import subscribe, unsubscribe
-
 from database import (
-    initialize_database,
     add_subscriber,
+    initialize_database,
     remove_subscriber,
 )
 
+from handlers.menu import show_menu
+from handlers.start import start
+from handlers.subscription import subscribe, unsubscribe
+
 from scheduler import setup_scheduler
+
+from services.safety_content import (
+    get_categories,
+    get_daily_safety_message,
+    get_random_safety_message,
+)
 
 
 # ============================================================
@@ -38,6 +44,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 # ============================================================
 
 logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
 
@@ -45,7 +52,216 @@ logger = logging.getLogger(__name__)
 
 
 # ============================================================
-# INLINE BUTTON HANDLER
+# TODAY BUTTON
+# ============================================================
+
+async def send_today(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    message = get_daily_safety_message()
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# RANDOM BUTTON
+# ============================================================
+
+async def send_random(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    message = get_random_safety_message()
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# CATEGORIES BUTTON
+# ============================================================
+
+async def send_categories(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    categories = get_categories()
+
+    category_text = "\n".join(
+        f"• {category}"
+        for category in categories
+    )
+
+    message = (
+        "📚 *LIFEGUARD 365 SAFETY CATEGORIES*\n\n"
+        f"{category_text}\n\n"
+        "Our mission is simple:\n"
+        "🛡️ Create awareness.\n"
+        "⚠️ Identify hazards.\n"
+        "❤️ Protect life."
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# QUIZ BUTTON
+# ============================================================
+
+async def send_quiz(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    message = (
+        "📝 *LIFEGUARD 365 SAFETY QUIZ*\n\n"
+        "You discover a serious electrical hazard "
+        "in your workplace. What should you do?\n\n"
+        "A️⃣ Ignore it.\n"
+        "B️⃣ Report it immediately.\n"
+        "C️⃣ Continue working around it.\n\n"
+        "✅ *Correct answer: B — Report it immediately.*\n\n"
+        "Remember: an identified hazard can be "
+        "controlled before it becomes an accident."
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# SUBSCRIBE BUTTON
+# ============================================================
+
+async def button_subscribe(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    user = update.callback_query.from_user
+
+    add_subscriber(
+        user_id=user.id,
+        first_name=user.first_name or "",
+        username=user.username or "",
+    )
+
+    message = (
+        "🔔 *SUBSCRIPTION ACTIVATED*\n\n"
+        "You are now subscribed to receive "
+        "LifeGuard 365 daily safety messages.\n\n"
+        "🛡️ One message.\n"
+        "💡 One lesson.\n"
+        "❤️ One safer decision.\n\n"
+        "Stay safe. Stay informed. Protect life."
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# UNSUBSCRIBE BUTTON
+# ============================================================
+
+async def button_unsubscribe(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    user = update.callback_query.from_user
+
+    remove_subscriber(user.id)
+
+    message = (
+        "🔕 *SUBSCRIPTION CANCELLED*\n\n"
+        "You will no longer receive automatic "
+        "LifeGuard 365 daily safety messages.\n\n"
+        "You can subscribe again anytime."
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# EMERGENCY BUTTON
+# ============================================================
+
+async def emergency_safety(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    message = (
+        "🚨 *EMERGENCY SAFETY REMINDER*\n\n"
+        "Stay calm.\n\n"
+        "Move away from immediate danger.\n\n"
+        "Alert people nearby when safe to do so.\n\n"
+        "Do not put yourself in unnecessary danger "
+        "while attempting to help another person.\n\n"
+        "Contact the appropriate emergency service "
+        "when necessary.\n\n"
+        "🛡️ *Safety first.*"
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# HELP BUTTON
+# ============================================================
+
+async def show_help(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    message = (
+        "ℹ️ *LIFEGUARD 365 HELP*\n\n"
+        "Your Daily Safety & Life Awareness Assistant.\n\n"
+        "*Commands:*\n\n"
+        "/start — Open LifeGuard 365\n"
+        "/menu — Open the safety dashboard\n"
+        "/today — Today's safety message\n"
+        "/random — Random safety message\n"
+        "/subscribe — Receive daily messages\n"
+        "/unsubscribe — Stop daily messages\n"
+        "/help — Show help\n\n"
+        "🛡️ Stay safe.\n"
+        "💡 Stay informed.\n"
+        "❤️ Protect life."
+    )
+
+    await update.callback_query.message.reply_text(
+        message,
+        parse_mode="Markdown",
+    )
+
+
+# ============================================================
+# CALLBACK ROUTER
 # ============================================================
 
 async def button_handler(
@@ -57,240 +273,39 @@ async def button_handler(
 
     await query.answer()
 
-    # --------------------------------------------------------
-    # TODAY'S SAFETY
-    # --------------------------------------------------------
-
     if query.data == "today":
-
-        from services.safety_content import get_daily_safety_message
-
-        message = get_daily_safety_message()
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # RANDOM SAFETY
-    # --------------------------------------------------------
+        await send_today(update, context)
 
     elif query.data == "random":
-
-        from services.safety_content import (
-            SAFETY_TOPICS,
-            format_safety_message,
-        )
-
-        import random
-
-        topic = random.choice(
-            list(SAFETY_TOPICS.keys())
-        )
-
-        safety_tip = random.choice(
-            SAFETY_TOPICS[topic]
-        )
-
-        message = format_safety_message(
-            topic,
-            safety_tip,
-        )
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # SAFETY CATEGORIES
-    # --------------------------------------------------------
+        await send_random(update, context)
 
     elif query.data == "categories":
-
-        message = """
-📚 *LIFEGUARD 365 SAFETY CATEGORIES*
-
-🦺 Workplace Safety
-🏠 Home Safety
-🚗 Road Safety
-⚡ Electrical Safety
-🔥 Fire Safety
-💧 Water Safety
-🍲 Food Safety
-🧼 Health & Hygiene
-💻 Cyber Safety
-🌍 Environmental Safety
-
-Choose safety today.
-Protect yourself.
-Protect others.
-Protect life.
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # SAFETY QUIZ
-    # --------------------------------------------------------
+        await send_categories(update, context)
 
     elif query.data == "quiz":
-
-        message = """
-📝 *LIFEGUARD 365 SAFETY QUIZ*
-
-What should you do when you discover a serious hazard?
-
-A️⃣ Ignore it.
-
-B️⃣ Report it immediately.
-
-C️⃣ Walk away without telling anyone.
-
-✅ *Correct answer: B — Report it immediately.*
-
-A hazard that is reported can be controlled.
-A hazard that is ignored can become an accident.
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # SUBSCRIBE
-    # --------------------------------------------------------
+        await send_quiz(update, context)
 
     elif query.data == "subscribe":
-
-        user = query.from_user
-
-        add_subscriber(
-            user_id=user.id,
-            first_name=user.first_name or "",
-            username=user.username or "",
-        )
-
-        message = """
-🔔 *LIFEGUARD 365 SUBSCRIPTION ACTIVATED*
-
-You are now subscribed to receive our automatic daily safety messages.
-
-⏰ Daily safety awareness
-🛡️ Practical safety guidance
-🌍 Life awareness
-
-One message.
-One lesson.
-One safer decision.
-
-❤️ *Protect life.*
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # UNSUBSCRIBE
-    # --------------------------------------------------------
+        await button_subscribe(update, context)
 
     elif query.data == "unsubscribe":
-
-        user = query.from_user
-
-        remove_subscriber(user.id)
-
-        message = """
-🔕 *LIFEGUARD 365 SUBSCRIPTION CANCELLED*
-
-You will no longer receive automatic daily safety messages.
-
-You can subscribe again at any time.
-
-🛡️ Stay safe.
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # EMERGENCY
-    # --------------------------------------------------------
+        await button_unsubscribe(update, context)
 
     elif query.data == "emergency":
-
-        message = """
-🚨 *EMERGENCY SAFETY REMINDER*
-
-Stay calm.
-
-Move away from immediate danger.
-
-Alert people nearby.
-
-Do not put yourself in unnecessary danger while attempting to help someone else.
-
-Contact the appropriate emergency service when necessary.
-
-🛡️ *Safety first.*
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
-
-    # --------------------------------------------------------
-    # HELP
-    # --------------------------------------------------------
+        await emergency_safety(update, context)
 
     elif query.data == "help":
-
-        message = """
-ℹ️ *LIFEGUARD 365 HELP*
-
-Use the menu buttons to access safety information.
-
-*Commands:*
-
-/start — Open LifeGuard 365
-/menu — Show the safety menu
-/today — Today's safety message
-/random — Random safety message
-/subscribe — Subscribe to daily messages
-/unsubscribe — Cancel subscription
-/help — Show help
-
-🛡️ *Stay safe. Stay informed. Protect life.*
-"""
-
-        await query.message.reply_text(
-            message,
-            parse_mode="Markdown",
-        )
+        await show_help(update, context)
 
 
 # ============================================================
-# TODAY COMMAND
+# COMMAND: TODAY
 # ============================================================
 
 async def today_command(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
-
-    from services.safety_content import (
-        get_daily_safety_message,
-    )
 
     message = get_daily_safety_message()
 
@@ -301,7 +316,7 @@ async def today_command(
 
 
 # ============================================================
-# RANDOM COMMAND
+# COMMAND: RANDOM
 # ============================================================
 
 async def random_command(
@@ -309,25 +324,7 @@ async def random_command(
     context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    from services.safety_content import (
-        SAFETY_TOPICS,
-        format_safety_message,
-    )
-
-    import random
-
-    topic = random.choice(
-        list(SAFETY_TOPICS.keys())
-    )
-
-    safety_tip = random.choice(
-        SAFETY_TOPICS[topic]
-    )
-
-    message = format_safety_message(
-        topic,
-        safety_tip,
-    )
+    message = get_random_safety_message()
 
     await update.message.reply_text(
         message,
@@ -336,7 +333,7 @@ async def random_command(
 
 
 # ============================================================
-# HELP COMMAND
+# COMMAND: HELP
 # ============================================================
 
 async def help_command(
@@ -344,25 +341,18 @@ async def help_command(
     context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    message = """
-ℹ️ *LIFEGUARD 365 HELP*
-
-Your Daily Safety & Life Awareness Assistant.
-
-*Commands:*
-
-/start — Open the bot
-/menu — Show the safety menu
-/today — Today's safety message
-/random — Random safety message
-/subscribe — Receive daily messages
-/unsubscribe — Stop daily messages
-/help — Show help
-
-🛡️ Stay safe.
-💡 Stay informed.
-❤️ Protect life.
-"""
+    message = (
+        "ℹ️ *LIFEGUARD 365 HELP*\n\n"
+        "Use /menu to open the safety dashboard.\n\n"
+        "/start — Start the bot\n"
+        "/menu — Safety dashboard\n"
+        "/today — Today's safety message\n"
+        "/random — Random safety message\n"
+        "/subscribe — Subscribe\n"
+        "/unsubscribe — Unsubscribe\n"
+        "/help — Help\n\n"
+        "🛡️ Stay safe. Stay informed. Protect life."
+    )
 
     await update.message.reply_text(
         message,
@@ -371,18 +361,18 @@ Your Daily Safety & Life Awareness Assistant.
 
 
 # ============================================================
-# MAIN APPLICATION
+# MAIN
 # ============================================================
 
 def main():
 
     if not BOT_TOKEN:
 
-        raise ValueError(
+        raise RuntimeError(
             "BOT_TOKEN environment variable is not set."
         )
 
-    # Create database tables
+    # Initialize SQLite database
     initialize_database()
 
     # Create Telegram application
@@ -398,71 +388,46 @@ def main():
     # --------------------------------------------------------
 
     application.add_handler(
-        CommandHandler(
-            "start",
-            start,
-        )
+        CommandHandler("start", start)
     )
 
     application.add_handler(
-        CommandHandler(
-            "menu",
-            show_menu,
-        )
+        CommandHandler("menu", show_menu)
     )
 
     application.add_handler(
-        CommandHandler(
-            "today",
-            today_command,
-        )
+        CommandHandler("today", today_command)
     )
 
     application.add_handler(
-        CommandHandler(
-            "random",
-            random_command,
-        )
+        CommandHandler("random", random_command)
     )
 
     application.add_handler(
-        CommandHandler(
-            "subscribe",
-            subscribe,
-        )
+        CommandHandler("subscribe", subscribe)
     )
 
     application.add_handler(
-        CommandHandler(
-            "unsubscribe",
-            unsubscribe,
-        )
+        CommandHandler("unsubscribe", unsubscribe)
     )
 
     application.add_handler(
-        CommandHandler(
-            "help",
-            help_command,
-        )
+        CommandHandler("help", help_command)
     )
 
     # --------------------------------------------------------
-    # INLINE BUTTONS
+    # INLINE BUTTON HANDLER
     # --------------------------------------------------------
 
     application.add_handler(
-        CallbackQueryHandler(
-            button_handler
-        )
+        CallbackQueryHandler(button_handler)
     )
 
     # --------------------------------------------------------
     # DAILY SCHEDULER
     # --------------------------------------------------------
 
-    setup_scheduler(
-        application
-    )
+    setup_scheduler(application)
 
     logger.info(
         "🛡️ LifeGuard 365 is running..."
@@ -474,14 +439,14 @@ def main():
     )
 
     # --------------------------------------------------------
-    # START TELEGRAM BOT
+    # START BOT
     # --------------------------------------------------------
 
     application.run_polling()
 
 
 # ============================================================
-# START
+# ENTRY POINT
 # ============================================================
 
 if __name__ == "__main__":

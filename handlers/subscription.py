@@ -7,7 +7,13 @@ from database import (
 )
 
 
-async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def subscribe(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """
+    Subscribe a Telegram user to daily LifeGuard 365 messages.
+    """
 
     user = update.effective_user
 
@@ -17,28 +23,47 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
         username=user.username or "",
     )
 
-    await update.message.reply_text(
-        "*LifeGuard 365 Subscription Activated!*\n\n"
-        "You are now subscribed to receive our daily "
-        "Safety & Life Awareness message.\n\n"
+    message = (
+        "🔔 *LIFEGUARD 365 SUBSCRIPTION ACTIVATED*\n\n"
+        "You are now subscribed to receive our "
+        "automatic daily Safety & Life Awareness message.\n\n"
+        "🛡️ Daily safety awareness\n"
+        "💡 Practical safety guidance\n"
+        "🌍 Life awareness\n\n"
         "One message.\n"
         "One lesson.\n"
         "One safer decision.\n\n"
-        "Stay safe. Stay informed. Protect life.",
+        "❤️ *Protect life.*"
+    )
+
+    await update.message.reply_text(
+        message,
         parse_mode="Markdown",
     )
 
 
-async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def unsubscribe(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """
+    Remove a Telegram user from daily LifeGuard 365 messages.
+    """
 
     user = update.effective_user
 
     remove_subscriber(user.id)
 
+    message = (
+        "🔕 *LIFEGUARD 365 SUBSCRIPTION CANCELLED*\n\n"
+        "You will no longer receive automatic "
+        "daily safety messages.\n\n"
+        "You can subscribe again at any time using "
+        "/subscribe.\n\n"
+        "🛡️ *Stay safe.*"
+    )
+
     await update.message.reply_text(
-        "*LifeGuard 365 Subscription Cancelled.*\n\n"
-        "You will no longer receive the daily automatic "
-        "safety messages.\n\n"
-        "You can subscribe again anytime with /subscribe.",
+        message,
         parse_mode="Markdown",
     )
