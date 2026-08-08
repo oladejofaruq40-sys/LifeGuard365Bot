@@ -28,7 +28,7 @@ async def button_handler(
 ):
     query = update.callback_query
     await query.answer()
-    if query.data == "today":
+    elif query.data == "today":
         await query.message.reply_text(
             " *Today's Safety Tip*\n\n"
             "Think before you act. "
