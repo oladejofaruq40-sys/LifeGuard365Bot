@@ -1,8 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from database.database import (
+from database import (
     add_subscriber,
-    remove_subscriber,
+    remove_subscriber
 )
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
