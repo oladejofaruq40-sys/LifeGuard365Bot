@@ -12,8 +12,7 @@ from handlers.start import start
 from handlers.menu import show_menu
 from handlers.subscription import subscribe, unsubscribe
 from scheduler import setup_scheduler
-from database.database import 
-initialize_database
+from database.database import initialize_database
 # Load environment variables
 load_dotenv()
 # Logging
