@@ -1,5 +1,4 @@
 from datetime import date
-import random
 
 
 SAFETY_TOPICS = {
@@ -16,7 +15,7 @@ SAFETY_TOPICS = {
         "Keep medicines and household chemicals away from children.",
         "Do not overload electrical sockets.",
         "Clean water spills immediately to prevent slips and falls.",
-        "Keep matches, lighters, and ignition sources away from children.",
+        "Keep matches, lighters, and other ignition sources away from children.",
     ],
 
     "Road Safety": [
@@ -24,7 +23,7 @@ SAFETY_TOPICS = {
         "Never use a mobile phone while driving.",
         "Reduce speed when visibility or road conditions are poor.",
         "Check mirrors and blind spots before changing lanes.",
-        "Never drive when impaired by alcohol, drugs, or extreme fatigue.",
+        "Never drive when your ability is impaired by alcohol, drugs, fatigue, or illness.",
     ],
 
     "Electrical Safety": [
@@ -68,7 +67,7 @@ SAFETY_TOPICS = {
     ],
 
     "Cyber Safety": [
-        "Never share passwords or verification codes with strangers.",
+        "Never share your passwords or verification codes with strangers.",
         "Be cautious of links asking for passwords or financial information.",
         "Use strong, unique passwords for important accounts.",
         "Enable multi-factor authentication whenever available.",
@@ -82,123 +81,46 @@ SAFETY_TOPICS = {
         "Conserve water whenever possible.",
         "Keep public areas and drainage channels free from waste.",
     ],
-
-    "Personal Security": [
-        "Stay aware of your surroundings when walking in unfamiliar places.",
-        "Avoid displaying large amounts of cash in public.",
-        "Keep important documents and valuables secure.",
-        "Tell someone you trust when travelling to an unfamiliar location.",
-        "Trust your instincts and move away from situations that feel unsafe.",
-    ],
-
-    "Child Safety": [
-        "Keep medicines and dangerous chemicals out of children's reach.",
-        "Teach children never to play with electrical outlets.",
-        "Never leave young children unattended near water.",
-        "Teach children how to contact a trusted adult during an emergency.",
-        "Keep small objects that can cause choking away from young children.",
-    ],
-
-    "Workplace Hygiene": [
-        "Wash or sanitize your hands regularly.",
-        "Keep shared work surfaces clean.",
-        "Do not share personal protective equipment unless it is properly sanitized.",
-        "Report spills and contamination immediately.",
-        "Stay home and seek appropriate guidance when seriously unwell.",
-    ],
-
-    "Construction Safety": [
-        "Wear the required PPE before entering a construction area.",
-        "Never work beneath an unsecured suspended load.",
-        "Use the correct ladder or access equipment for the task.",
-        "Keep tools and materials secured to prevent falling objects.",
-        "Follow site safety procedures before starting work.",
-    ],
-
-    "Agricultural Safety": [
-        "Keep children away from operating farm machinery.",
-        "Wear appropriate PPE when handling agricultural chemicals.",
-        "Inspect machinery before operating it.",
-        "Store pesticides and chemicals in properly labelled secure areas.",
-        "Never operate machinery when excessively tired.",
-    ],
-
-    "Travel Safety": [
-        "Keep important documents and emergency contacts accessible when travelling.",
-        "Check weather and road conditions before a long journey.",
-        "Tell someone you trust about your travel plans when appropriate.",
-        "Keep your phone charged during long journeys.",
-        "Know where emergency assistance is available when travelling.",
-    ],
 }
 
 
 def get_daily_safety_message():
     """
-    Select one safety topic and one safety tip based on today's date.
-    The same message will be returned throughout the same day.
+    Selects a deterministic safety topic and message
+    based on the current date.
     """
 
     today = date.today()
-    day_number = today.toordinal()
 
     topics = list(SAFETY_TOPICS.keys())
 
-    topic = topics[day_number % len(topics)]
+    topic_index = today.toordinal() % len(topics)
+    topic = topics[topic_index]
 
     messages = SAFETY_TOPICS[topic]
 
-    safety_tip = messages[day_number % len(messages)]
+    message_index = today.toordinal() % len(messages)
+    safety_tip = messages[message_index]
 
-    return format_safety_message(
-        topic,
-        safety_tip,
-    )
-
-
-def get_random_safety_message():
-    """
-    Select a completely random safety topic and safety tip.
-    """
-
-    topic = random.choice(
-        list(SAFETY_TOPICS.keys())
-    )
-
-    safety_tip = random.choice(
-        SAFETY_TOPICS[topic]
-    )
-
-    return format_safety_message(
-        topic,
-        safety_tip,
-    )
-
-
-def get_categories():
-    """
-    Return all available safety categories.
-    """
-
-    return list(SAFETY_TOPICS.keys())
+    return format_safety_message(topic, safety_tip)
 
 
 def format_safety_message(topic, safety_tip):
     """
-    Format a professional LifeGuard 365 safety message.
+    Formats the daily safety message for Telegram.
     """
 
     return (
-        "🛡️ *LIFEGUARD 365*\n\n"
-        "🚨 *DAILY SAFETY MESSAGE*\n\n"
-        f"📌 *Category:* {topic}\n\n"
-        f"⚠️ *CAUTION:*\n{safety_tip}\n\n"
-        "━━━━━━━━━━━━━━━━━━\n"
-        "💡 *REMEMBER*\n"
+        "*LIFEGUARD 365*\n\n"
+        "*DAILY SAFETY MESSAGE*\n\n"
+        f"*Topic:* {topic}\n\n"
+        f"{safety_tip}\n\n"
+        "━━━━━━━━━━━━━━\n"
+        "*Remember:*\n"
         "A few seconds of caution can prevent "
         "a lifetime of regret.\n\n"
-        "🛡️ Protect yourself.\n"
-        "🤝 Protect others.\n"
-        "❤️ Protect life.\n\n"
+        "Protect yourself.\n"
+        "Protect others.\n"
+        "Protect life.\n\n"
         "— *LifeGuard 365*"
     )
