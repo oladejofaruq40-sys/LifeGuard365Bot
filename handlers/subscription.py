@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from database import (
+from database.database import (
     add_subscriber,
     remove_subscriber,
 )
@@ -16,6 +16,9 @@ async def subscribe(
     """
 
     user = update.effective_user
+
+    if user is None:
+        return
 
     add_subscriber(
         user_id=user.id,
@@ -36,10 +39,11 @@ async def subscribe(
         "❤️ *Protect life.*"
     )
 
-    await update.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
+    if update.message:
+        await update.message.reply_text(
+            message,
+            parse_mode="Markdown",
+        )
 
 
 async def unsubscribe(
@@ -52,6 +56,9 @@ async def unsubscribe(
 
     user = update.effective_user
 
+    if user is None:
+        return
+
     remove_subscriber(user.id)
 
     message = (
@@ -63,7 +70,8 @@ async def unsubscribe(
         "🛡️ *Stay safe.*"
     )
 
-    await update.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
+    if update.message:
+        await update.message.reply_text(
+            message,
+            parse_mode="Markdown",
+        )
