@@ -8,7 +8,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from database import get_subscribers
+from database.database import get_subscribers
 from services.safety_content import get_daily_safety_message
 
 
