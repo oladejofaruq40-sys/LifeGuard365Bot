@@ -1,42 +1,21 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from services.safety_content import get_daily_safety_message
+from database.database import initialize_database
 
 
-async def start(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-    """
-    Handles the /start command.
-    """
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    initialize_database()
 
     user = update.effective_user
 
-    first_name = user.first_name or "Friend"
-
-    message = (
-        f"👋 *Welcome, {first_name}!*\n\n"
-        "🛡️ *LIFEGUARD 365*\n"
-        "Your Daily Safety & Life Awareness Assistant.\n\n"
-        "Every day, LifeGuard 365 delivers practical "
-        "safety awareness designed to help you:\n\n"
-        "🧠 Think before you act.\n"
-        "⚠️ Recognize hazards.\n"
-        "🛡️ Prevent accidents.\n"
-        "❤️ Protect life.\n\n"
-        "Use /menu to explore the LifeGuard 365 "
-        "safety features.\n\n"
-        "📢 You can also use /subscribe to receive "
-        "our automatic daily safety message.\n\n"
-        "Stay safe.\n"
-        "Stay informed.\n"
-        "Protect life.\n\n"
-        "— *LifeGuard 365*"
-    )
-
     await update.message.reply_text(
-        message,
+        f"🛡️ *Welcome to LifeGuard 365, {user.first_name or 'Friend'}!*\n\n"
+        "Your daily companion for Safety, Awareness and Life Protection.\n\n"
+        "Every day, we deliver:\n"
+        "🔹 One safety message\n"
+        "🔹 One practical lesson\n"
+        "🔹 One safer decision\n\n"
+        "Use the menu below to explore LifeGuard 365.",
         parse_mode="Markdown",
     )
