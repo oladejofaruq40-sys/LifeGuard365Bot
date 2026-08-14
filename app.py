@@ -11,7 +11,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from database import (
+from database.database import (
     add_subscriber,
     initialize_database,
     remove_subscriber,

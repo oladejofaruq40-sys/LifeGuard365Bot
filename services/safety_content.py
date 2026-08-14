@@ -1,4 +1,5 @@
 from datetime import date
+import random
 
 
 SAFETY_TOPICS = {
@@ -124,3 +125,20 @@ def format_safety_message(topic, safety_tip):
         "Protect life.\n\n"
         "— *LifeGuard 365*"
     )
+
+
+def get_categories():
+    """
+    Return all available LifeGuard 365 safety categories.
+    """
+    return list(SAFETY_TOPICS.keys())
+
+
+def get_random_safety_message():
+    """
+    Return a randomly selected safety message.
+    """
+    topic = random.choice(list(SAFETY_TOPICS.keys()))
+    safety_tip = random.choice(SAFETY_TOPICS[topic])
+
+    return format_safety_message(topic, safety_tip)
