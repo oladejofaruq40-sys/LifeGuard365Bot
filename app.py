@@ -20,6 +20,8 @@ from database.database import (
 from handlers.menu import show_menu
 from handlers.start import start
 from handlers.subscription import subscribe, unsubscribe
+from handlers.quiz import quiz_start, quiz_answer
+from handlers.safety import send_today, send_random, send_categories
 
 from scheduler import setup_scheduler
 
@@ -49,98 +51,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
-
-# ============================================================
-# TODAY BUTTON
-# ============================================================
-
-async def send_today(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-
-    message = get_daily_safety_message()
-
-    await update.callback_query.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
-
-
-# ============================================================
-# RANDOM BUTTON
-# ============================================================
-
-async def send_random(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-
-    message = get_random_safety_message()
-
-    await update.callback_query.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
-
-
-# ============================================================
-# CATEGORIES BUTTON
-# ============================================================
-
-async def send_categories(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-
-    categories = get_categories()
-
-    category_text = "\n".join(
-        f"• {category}"
-        for category in categories
-    )
-
-    message = (
-        "📚 *LIFEGUARD 365 SAFETY CATEGORIES*\n\n"
-        f"{category_text}\n\n"
-        "Our mission is simple:\n"
-        "🛡️ Create awareness.\n"
-        "⚠️ Identify hazards.\n"
-        "❤️ Protect life."
-    )
-
-    await update.callback_query.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
-
-
-# ============================================================
-# QUIZ BUTTON
-# ============================================================
-
-async def send_quiz(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-
-    message = (
-        "📝 *LIFEGUARD 365 SAFETY QUIZ*\n\n"
-        "You discover a serious electrical hazard "
-        "in your workplace. What should you do?\n\n"
-        "A️⃣ Ignore it.\n"
-        "B️⃣ Report it immediately.\n"
-        "C️⃣ Continue working around it.\n\n"
-        "✅ *Correct answer: B — Report it immediately.*\n\n"
-        "Remember: an identified hazard can be "
-        "controlled before it becomes an accident."
-    )
-
-    await update.callback_query.message.reply_text(
-        message,
-        parse_mode="Markdown",
-    )
 
 
 # ============================================================
@@ -283,7 +193,14 @@ async def button_handler(
         await send_categories(update, context)
 
     elif query.data == "quiz":
-        await send_quiz(update, context)
+        await quiz_start(update, context)
+
+    elif query.data.startswith("quiz_answer:"):
+        await quiz_answer(update, context)
+
+    elif query.data == "quiz_exit":
+        from handlers.quiz import exit_quiz
+        await exit_quiz(update, context)
 
     elif query.data == "subscribe":
         await button_subscribe(update, context)
