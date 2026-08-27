@@ -21,6 +21,7 @@ from handlers.menu import show_menu
 from handlers.start import start
 from handlers.subscription import subscribe, unsubscribe
 from handlers.quiz import quiz_start, quiz_answer
+from handlers.category import show_category_menu, show_category
 from handlers.safety import send_today, send_random, send_categories
 
 from scheduler import setup_scheduler
@@ -190,7 +191,10 @@ async def button_handler(
         await send_random(update, context)
 
     elif query.data == "categories":
-        await send_categories(update, context)
+        await show_category_menu(update, context)
+
+    elif query.data.startswith("category:"):
+        await show_category(update, context)
 
     elif query.data == "quiz":
         await quiz_start(update, context)
@@ -213,6 +217,9 @@ async def button_handler(
 
     elif query.data == "help":
         await show_help(update, context)
+
+    elif query.data == "menu":
+        await show_menu(update, context)
 
 
 # ============================================================
