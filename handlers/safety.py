@@ -7,12 +7,21 @@ from services.safety_content import (
     get_random_safety_message,
 )
 
+from database.database import (
+    record_tip_view,
+)
+
 
 async def send_today(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
-    """Send today's safety message."""
+    """Send today's safety message and record user activity."""
+
+    user = update.effective_user
+
+    if user:
+        record_tip_view(user.id)
 
     message = get_daily_safety_message()
 
@@ -32,7 +41,12 @@ async def send_random(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
-    """Send a random safety message."""
+    """Send a random safety message and record user activity."""
+
+    user = update.effective_user
+
+    if user:
+        record_tip_view(user.id)
 
     message = get_random_safety_message()
 

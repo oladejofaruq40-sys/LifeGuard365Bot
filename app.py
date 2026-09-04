@@ -23,6 +23,7 @@ from handlers.subscription import subscribe, unsubscribe
 from handlers.quiz import quiz_start, quiz_answer
 from handlers.category import show_category_menu, show_category
 from handlers.safety import send_today, send_random, send_categories
+from handlers.progress import show_progress
 
 from scheduler import setup_scheduler
 
@@ -205,6 +206,9 @@ async def button_handler(
     elif query.data == "quiz_exit":
         from handlers.quiz import exit_quiz
         await exit_quiz(update, context)
+
+    elif query.data == "progress":
+        await show_progress(update, context)
 
     elif query.data == "subscribe":
         await button_subscribe(update, context)

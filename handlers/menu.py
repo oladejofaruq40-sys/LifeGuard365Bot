@@ -31,6 +31,12 @@ async def show_menu(
         ],
         [
             InlineKeyboardButton(
+                "🏆 My Safety Progress",
+                callback_data="progress",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 "🔔 Subscribe",
                 callback_data="subscribe",
             ),
